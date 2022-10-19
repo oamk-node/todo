@@ -13,8 +13,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 app.use('/',todoRouter)
 
-const port = 3001
-
+const port = 3002
 
 app.use((err,req,res,next)=> {
   const statusCode = err.statusCode || 500

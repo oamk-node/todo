@@ -6,7 +6,7 @@ const URL = 'http://localhost:3001/'
 
 function App() {
   const [tasks, setTasks] = useState([])
-  const [task, setTask] = useState('')
+  const [newTask, setNewTask] = useState('')
   const [editTask, setEditTask] = useState(null)
   const [editDescription,setEditDescription] = useState('')
 
@@ -20,7 +20,7 @@ function App() {
   }, [])
 
   function save() {
-    const json = JSON.stringify({description: task})
+    const json = JSON.stringify({description: newTask})
     axios.post(URL + 'new',json,{
       headers: {
         'Content-Type' : 'application/json'
@@ -33,7 +33,7 @@ function App() {
       addedObject.id = response.data.id
       // Update state variable with newly added data.
       setTasks(tasks => [...tasks, addedObject])
-      setTask('')
+      setNewTask('')
     }).catch(error => {
       alert(error.response.data.error)
     })
@@ -48,7 +48,6 @@ function App() {
       alert(error.response.data.error)
     })
   }
-
   function edit() {
     const json = JSON.stringify({id: editTask.id,description: editDescription})
     axios.put(URL + 'edit',json,{
@@ -61,15 +60,17 @@ function App() {
       const editedObject = JSON.parse(json)
       // Create copy of tasks state variable.
       const tempArray = [...tasks]
-      // Find task that was being edited.
-      const index = tempArray.findIndex(task => {return editTask.id})
+      // Fins task that was being edited.
+      const index = tempArray.findIndex(task => {return task.id === editTask.id})
       // If found, update description.
       if (index !==-1) tempArray[index].description = editDescription
-      // Assign copied array back to state variable to update it.
+      // Update state containing list of tasks.
       setTasks(tempArray)
-      
+      // Reset state variables related to editing.
       setEditTask(null)
       setEditDescription('')
+     
+
     }).catch(error => {
       alert(error.response.data.error)
     })
@@ -80,23 +81,30 @@ function App() {
     setEditDescription(task.description)
   }
 
+  const handleChange = (e) => {
+    setEditDescription(e.target.value)
+    //console.log('tasks handleChange')
+    //console.log(tasks)
+  }
+
   return (
     <div style={{margin: '20px'}}>
       <h3>My tasks</h3>
       <form>
         <label>Add new</label>
-        <input value={task} onChange={e => setTask(e.target.value)}/>
+        <input value={newTask} onChange={e => setNewTask(e.target.value)}/>
         <button type='button' onClick={save}>Save</button>
       </form>
       <ol>
       {tasks.map(task => (
-        <li key={task.id}>
+        <li key={task.id} data-testid='todo'>
           {editTask?.id !== task.id &&
-            task.description + ' '
+            task.id + ' ' + task.description + ' '
           }
           {editTask?.id === task.id &&
             <form>
-              <input value={editDescription} onChange={e => setEditDescription(e.target.value)} />
+              <output>{task.id}</output>
+              <input value={editDescription} onChange={e => handleChange(e)} />
               <button type="button" onClick={edit}>Save</button>
               <button type="button" onClick={() => setEditTask(null)}>Cancel</button>
             </form>
